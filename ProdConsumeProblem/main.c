@@ -101,3 +101,28 @@ int main(int argc, char **argv)
 
 	return OK;
 }
+
+/* ----- ANALYSIS ----- */
+/*  What could go wrong?
+		Since each process is sharing access to the buffer, the OS/programmer needs to be sure that
+		the producer and consumer processes work together nicely without conflict. This means that
+		they cannot access the same element at the same time, the producer can't produce anything if
+		the buffer is full, and the consumer can't consume anything if the buffer is empty.
+		Producer Problems:
+			- Shouldn't produce to full buffer
+			- Shouldn't starve the consumer
+		Consumer Problems:
+			- Shouldn't consume from empty buffer
+			- Shouldn't starve the producer
+
+	SOLUTION:
+		Here, I will be using semaphores to assure that the producer and consumer play nicely. I have
+		two semaphores: can_consume, which indicates if the consumer is safe to consume items from the
+		buffer, and can_produce, which indicates if the producer is safe to produce items to the buffer.
+		The inital value of can_consume is 0 because the buffer is empty at the start and is therefore 
+		unsafe to consume items from. The initial value of can_produce is MAX_ITEMS, because the producer
+		can produce MAX_ITEMS until the buffer is full. I then create each producer and consumer process
+		with the same priority. Each process waits until its respective semaphore is signalled, then
+		proceeds with consuming/producing. After that, it signals the opposite semaphore. This assures
+		that whenever the producer produces, it says "I created a new item which can now be consumed."
+		and vice versa for the consumer.
