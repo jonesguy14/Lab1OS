@@ -126,3 +126,5 @@ int main(int argc, char **argv)
 		proceeds with consuming/producing. After that, it signals the opposite semaphore. This assures
 		that whenever the producer produces, it says "I created a new item which can now be consumed."
 		and vice versa for the consumer.
+
+*/
