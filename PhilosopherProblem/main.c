@@ -8,25 +8,25 @@
 void philosopher( char name, sid32 fork_low, sid32 fork_high, sid32 print ) { //takes in name, low fork and high fork
 	int i = 0;
 	for ( i = 0; i < 150; i++ ) { //run through 150 iterations of eating/waiting
-		sleep( rand() * 1000000 ); //"thinks" for a random time before deciding to eat again
+		//sleep( rand() ); //"thinks" for a random time before deciding to eat again
 		wait( fork_low ); //waits on lower # fork
-		wait( print );
+		wait( print ); //mutex so only one process can print at a time
 		kprintf( "Phil %c has grabbed low fork.\n", name );
-		signal( print );
+		signal( print ); //signal so others can print
 		wait( fork_high ); //waits of higher # fork, already has other fork in hand
-		wait( print );
+		wait( print ); //mutex so only one process can print at a time
 		kprintf( "Phil %c has grabbed high fork and is ready to eat.\n", name );
-		signal( print );
-		sleep( rand() * 1000000 ); //"eats" for a random time
-		wait( print );
+		signal( print ); //signal so others can print
+		//sleep( rand() ); //"eats" for a random time
+		wait( print ); //mutex so only one process can print at a time
 		kprintf( "Phil %c has finished eating and will now signal.\n", name );
-		signal( print );
+		signal( print ); //signal so others can print
 		signal( fork_high ); //signals high fork first, creates a mutex of the high fork with line 13
 		signal( fork_low ); //signals low fork next, creates a mutex of the low fork with line 11
-		wait( print );
+		wait( print ); //mutex so only one process can print at a time
 		kprintf( "Phil %c is now thinking.\n", name );
 		kprintf( "On iteration %d.\n", i );
-		signal( print );
+		signal( print ); //signal so others can print
 		//This implementation is gridlock free because of the mutual exclusion created with the low and high forks.
 		//Each fork can only be used by one philosopher at a time, and can only "eat" if they have both forks.
 		//After they are done eating, they signal both forks so that they are made available to the other philosophers.
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	sid32 fork3 = semcreate( 1 ); //fork 3 semaphore
 	sid32 fork4 = semcreate( 1 ); //fork 4 semaphore
 	sid32 fork5 = semcreate( 1 ); //fork 5 semaphore
-	sid32 print = semcreate( 1 );
+	sid32 print = semcreate( 1 ); //print semaphore
 	//each philosopher has a left fork and a right fork, they will always grab lower # fork first
 	resume( create(philosopher, 4096, 50, "philosopherA", 4, 'A', fork1, fork2, print ) ); //philosopher A has forks 1 & 2
 	resume( create(philosopher, 4096, 50, "philosopherB", 4, 'B', fork2, fork3, print ) ); //philosopher B has forks 2 & 3
